@@ -1,0 +1,21 @@
+{
+    "name": "ahmadpriatama/xls-woles",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Ahmad Priatama",
+            "email": "ahmad.priatama@gmail.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpexcel": "^1.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "XLSWoles\\": "src/"
+        }
+    }
+}
