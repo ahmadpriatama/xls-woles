@@ -1,0 +1,18 @@
+#!/usr/bin/env php
+<?php
+
+require_once join(DIRECTORY_SEPARATOR, [dirname(dirname(__FILE__)), 'PhpSpreadsheet', 'Bootstrap.php']);
+require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'non_composer_loader.php';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'SplitNameFilter.php';
+
+$fileConfig = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'column-config.json';
+$fileInput = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'Book1.xlsx';
+
+$config = json_decode(file_get_contents($fileConfig), true);
+$data = \XLSWoles\Reader::load($fileInput)
+    ->setSheetName('Sheet1')
+    ->setColumnConfig($config['columns'])
+    ->setDataRange('a2:e6')
+    ->fetch();
+
+print_r($data);

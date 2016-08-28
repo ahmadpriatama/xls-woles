@@ -1,102 +1,193 @@
-# xls-woles
+# xls-woles [![Build Status](https://travis-ci.org/ahmadpriatama/xls-woles.svg?branch=master)](https://travis-ci.org/ahmadpriatama/xls-woles)
 
-build [![Build Status](https://travis-ci.org/ahmadpriatama/xls-woles.svg?branch=master)](https://travis-ci.org/ahmadpriatama/xls-woles)
+## Installation
 
-example:
+The preferred way to install this extension is through [composer](http://getcomposer.org/download/). 
 
-| Book Name   	| Author           	| Publisher 	| ISBN          	| English 	| Non English 	|
-|-------------	|------------------	|-----------	|---------------	|---------	|-------------	|
-| Span        	| Betty Reed       	| Flashspan 	| 7184082155430 	| X       	|             	|
-| Bytecard    	| Roy Warren       	| Skipstorm 	| 5753711080260 	| X       	|             	|
-| Keylex      	| Anthony Black    	| Katz      	| 3039624528740 	| X       	|             	|
-| Aerified    	| Mildred Crawford 	| Gigashots 	| 1716325845670 	|         	| X           	|
-| Solarbreeze 	| Lois Hunter      	| Eabox     	| 5054483477940 	|         	| X           	|
+### Install
+
+Either run
+
+```
+$ php composer.phar require ahmadpriatama/xls-woles "*"
+```
+
+or add
+
+```
+"ahmadpriatama/xls-woles": "*"
+```
+
+to the ```require``` section of your `composer.json` file.
+
+## Demo
+see folder ```demo```
+
+## Usage Example
+We have a list of children book in `Book1.xlsx` as shown below
+
+![alt tag](https://raw.githubusercontent.com/ahmadpriatama/xls-woles/master/demo/Book1.png)
     
+And your supervisor want clean data to be imported with specs:
+   1. Book name must stored in lower case string
+   2. Must split author name into first name and last name
+   3. ISBN must stored in format XXX-X-XX-XXXXXX-X
+   4. Language must stored in constant value ex: `Book::LANG_EN = 1` or `Book::LANG_NON_EN = 2`
+   
+  
+and this is your script
 
-usage:
-
-    $config = json_decode(file_get_contents('column-config.json'), true);
-    $this->xlsInstance = \XLSWoles\Reader::load('input.xls');
-    $data = $this->xlsInstance->setSheetName('sheet1')
-        ->setColumnConfig($config)
-        ->setDataRange('a1:e5')
+    $config = json_decode(file_get_contents($fileConfig), true);
+    $data = \XLSWoles\Reader::load($fileInput)
+        ->setSheetName('Sheet1')
+        ->setColumnConfig($config['columns'])
+        ->setDataRange('a2:e6')
         ->fetch();
         
 column-config.json:
 
     {
+      "columns" : {
         "book-name": {
-            "filters": [
-                "string-lowercase"
-            ]
+          "filters": [
+            "string-lowercase"
+          ]
         },
-        "author": {},
+        "author-name": {
+          "filters":[
+            "SplitNameFilter"
+          ]
+        },
         "publisher": {},
         "isbn": {
-            "filters": [
-                "regex||[^0-9\\-]*([0-9\\-]+).*||$1",
-                "regex||(\d{3})(\d{1})(\d{2})(\d{6})(\d{1})||$1-$2-$3-$4-$5"
-            ]
+          "filters": [
+            "regex||-||",
+            "regex||(\\d{3})(\\d{1})(\\d{2})(\\d{6})(\\d{1})||$1-$2-$3-$4-$5"
+          ]
         },
-        "is-english": {
-            "type": "multiColumn",
-            "columnCount": 2,
-            "translate": ["Y", "N"]
+        "language": {
+          "filters": [
+            "string-lowercase",
+            "regex||english||1"
+          ]
         }
+      }
     }
+   
+ you see that `author-name` field has `SplitNameFilter` which is a custom filter which source code as shown below:
+ 
+     <?php
+     
+     /**
+      * Class SplitNameFilter
+      * @author Ahmad Priatama <ahmad.priatama@gmail.com>
+      * @since 2016.08.28
+      */
+     class SplitNameFilter
+     {
+     
+         /**
+          * @param string $input Input String
+          * @return array
+          */
+         public function process($input)
+         {
+             $arr = explode(' ', $input);
+             $count = count($arr);
+             if ($count == 1) {
+                 return [
+                     'first-name' => $arr[0],
+                     'last-name' => null,
+                 ];
+             } else {
+                 return [
+                     'first-name' => implode(' ', array_slice($arr, 0, $count-1)),
+                     'last-name' => $arr[$count-1],
+                 ];
+             }
+         }
+     }
     
-output:
+`print_r($data);` should give you
 
     Array
     (
         [0] => Array
             (
-                [book-name] => span
-                [author] => Betty Reed
-                [publisher] => Flashspan
-                [isbn] => 718-4-08-215543-0
-                [is-english] => Y
+                [book-name] => where the wild things are
+                [author-name] => Array
+                    (
+                        [first-name] => Maurice
+                        [last-name] => Sendak
+                    )
+    
+                [publisher] => HarperCollins
+                [isbn] => 978-0-06-443178-1
+                [language] => 1
             )
+    
         [1] => Array
             (
-                [book-name] => bytecard
-                [author] => Roy Warren
-                [publisher] => Skipstorm
-                [isbn] => 575-3-71-108026-0
-                [is-english] => Y
+                [book-name] => the snowy day
+                [author-name] => Array
+                    (
+                        [first-name] => Ezra Jack
+                        [last-name] => Keats
+                    )
+    
+                [publisher] => Puffin Books
+                [isbn] => 978-0-14-050182-7
+                [language] => 1
             )
+    
         [2] => Array
             (
-                [book-name] => keylex
-                [author] => Anthony Black
-                [publisher] => Katz
-                [isbn] => 303-9-62-452874-0
-                [is-english] => Y
+                [book-name] => goodnight moon
+                [author-name] => Array
+                    (
+                        [first-name] => Margaret Wise
+                        [last-name] => Brown
+                    )
+    
+                [publisher] => HarperCollins
+                [isbn] => 978-0-06-443017-3
+                [language] => 1
             )
+    
         [3] => Array
             (
-                [book-name] => aerified
-                [author] => Mildred Crawford
-                [publisher] => Gigashots
-                [isbn] => 171-6-32-584567-0
-                [is-english] => N
+                [book-name] => owl moon
+                [author-name] => Array
+                    (
+                        [first-name] => Jane
+                        [last-name] => Yolen
+                    )
+    
+                [publisher] => Philomel Books
+                [isbn] => 978-0-39-921457-8
+                [language] => 1
             )
+    
         [4] => Array
             (
-                [book-name] => solarbreeze
-                [author] => Lois Hunter
-                [publisher] => Eabox
-                [isbn] => 505-4-48-347794-0
-                [is-english] => N
+                [book-name] => the giving tree
+                [author-name] => Array
+                    (
+                        [first-name] => Shel
+                        [last-name] => Silverstein
+                    )
+    
+                [publisher] => Harper & Row
+                [isbn] => 978-0-06-025665-4
+                [language] => 1
             )
+    
     )
-
-similar to:
-
-| book-name   	| author           	| publisher 	| isbn               	| is-english 	|
-|-------------	|------------------	|-----------	|-------------------	|-----------	|
-| span        	| Betty Reed       	| Flashspan 	| 718-4-08-215543-0 	| Y         	|
-| bytecard    	| Roy Warren       	| Skipstorm 	| 575-3-71-108026-0 	| Y         	|
-| keylex      	| Anthony Black    	| Katz      	| 303-9-62-452874-0 	| Y         	|
-| aerified    	| Mildred Crawford 	| Gigashots 	| 171-6-32-584567-0 	| N         	|
-| solarbreeze 	| Lois Hunter      	| Eabox     	| 505-4-48-347794-0 	| N         	|
+    
+## Built-in Filters
+1. Regex Replace
+2. String Lowercase
+3. String Uppercase
+4. String to Time
+5. Default Value
+6. Null on Empty
