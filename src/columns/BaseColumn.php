@@ -49,7 +49,17 @@ class BaseColumn
     /**
      * @var array
      */
+    public $validators;
+
+    /**
+     * @var array
+     */
     public $_filters = [];
+
+    /**
+     * @var array
+     */
+    public $_validators = [];
 
     /**
      * @var array
@@ -61,7 +71,8 @@ class BaseColumn
             'N/A',
             'TBA'
         ],
-        'filters' => []
+        'filters' => [],
+        'validators' => [],
     ];
 
     /**
@@ -82,10 +93,29 @@ class BaseColumn
         }
         $obj->name = $key;
         $obj->filters = $config['filters'];
+        $obj->validators = $config['validators'];
         $obj->asEmptyValue = $config['asEmptyValue'];
         $obj->initFilters();
+        $obj->initValidators();
 
         return $obj;
+    }
+
+    /**
+     * @return void
+     */
+    public function initValidators()
+    {
+        foreach ($this->validators as $validator) {
+            if (is_string($validator)) {
+                $obj = $this->createValidator($validator);
+            } else {
+                $class = $validator['class'];
+                unset($validator['class']);
+                $obj = $this->createValidator($class, $validator, true);
+            }
+            $this->_validators[] = $obj;
+        }
     }
 
     /**
@@ -109,10 +139,27 @@ class BaseColumn
     }
 
     /**
-     * @param array $config
+     * @param string  $class Class Name
+     * @param array   $config
+     * @param boolean $configExplicit
      * @return object
      */
-    private function createFilter($class, $config, $configExplicit = false)
+    private function createValidator($class, $config = [], $configExplicit = false)
+    {
+       $validator = new $class();
+       foreach ($config as $key => $value) {
+          $validator->{$key} = $value;
+       }
+       return $validator;
+    }
+
+    /**
+     * @param string  $class Class Name
+     * @param array   $config
+     * @param boolean $configExplicit
+     * @return object
+     */
+    private function createFilter($class, $config = [], $configExplicit = false)
     {
         if ($class == StringLowercaseFilter::KEYWORD) {
             $class = StringLowercaseFilter::class;
@@ -153,5 +200,19 @@ class BaseColumn
             $string = $filter->process($string);
         }
         return $string;
+    }
+
+    /**
+     * @param string $string Text.
+     * @return string
+     */
+    public function runThroughValidators($string)
+    {
+        foreach ($this->_validators as $validator) {
+            $error = $validator->check($string);
+            if (!empty($error)) {
+               return $error;
+            }
+        }
     }
 }

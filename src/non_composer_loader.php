@@ -21,3 +21,6 @@ require_once 'filters' . DIRECTORY_SEPARATOR . 'RegexFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringLowercaseFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringUppercaseFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringToTimeFilter.php';
+
+/* Validators */
+require_once 'validators' . DIRECTORY_SEPARATOR . 'RequiredValidator.php';

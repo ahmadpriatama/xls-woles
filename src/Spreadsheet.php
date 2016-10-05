@@ -79,6 +79,15 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
     }
 
     /**
+     * @param string $index Sheet index.
+     * @return integer
+     */
+    public function getHighestRow()
+    {
+        return $this->_sheetInstance->getHighestRow();
+    }
+
+    /**
      * @param string $columnConfig Column config.
      * @return $this
      */
@@ -106,7 +115,10 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
         $this->initColumns();
         $range = static::calcRange($this->dataRange);
 
-        $data = [];
+        $data = [
+           'values' => [],
+           'errors' => [],
+        ];
         foreach (range($range['start']['row'], $range['end']['row']) as $index => $row) {
             $col = $range['start']['column'];
             foreach ($this->_columns as $column) {
@@ -114,7 +126,10 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
                 if (isset($return['jump'])) {
                     $col = static::increment($col, $return['jump']);
                 }
-                $data[$index][$column->name] = $return['value'];
+                $data['values'][$index][$column->name] = $return['value'];
+                if ($return['error']) {
+                   $data['errors'][$index][$column->name] = $return['error'];
+                }
                 $col = static::increment($col, 1);
             }
         }

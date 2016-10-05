@@ -28,8 +28,11 @@ class SingleColumn extends BaseColumn
         if (in_array($val, $this->asEmptyValue)) {
             $val = '';
         }
+        $value = $this->runThroughFilters($val);
+        $error = $this->runThroughValidators($value);
         return [
-            'value' => $this->runThroughFilters($val),
+            'value' => $value,
+            'error' => $error,
         ];
     }
 }
