@@ -32,9 +32,10 @@ class MultipleColumn extends BaseColumn
      * @param \PHPExcel\Worksheet $worksheet Worksheet instance.
      * @param string              $column    Column name.
      * @param integer             $row       Row index.
+     * @param array               $rowData   Row data.
      * @return mixed
      */
-    public function getValue(\PHPExcel\Worksheet $worksheet, $column, $row)
+    public function getValue($worksheet, $column, $row, &$rowData)
     {
         foreach (range(0, $this->columnCount - 1) as $index) {
             $col = Spreadsheet::increment($column, $index);
@@ -43,10 +44,13 @@ class MultipleColumn extends BaseColumn
                 $val = '';
             }
             if (!empty($val)) {
+                $rowData[$this->name] = $this->translate[$index];
                 return [
                     'value' => $this->translate[$index],
                     'jump' => $this->columnCount - 1,
                 ];
+            } else {
+                $rowData[$this->name] = null;
             }
         }
     }

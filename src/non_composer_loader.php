@@ -6,6 +6,8 @@
  * Time: 3:26 PM
  */
 
+require_once dirname(dirname(dirname(__FILE__))) . '/phpexcel/Classes/PHPExcel.php';
+
 require_once 'Reader.php';
 require_once 'Spreadsheet.php';
 
@@ -21,3 +23,7 @@ require_once 'filters' . DIRECTORY_SEPARATOR . 'RegexFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringLowercaseFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringUppercaseFilter.php';
 require_once 'filters' . DIRECTORY_SEPARATOR . 'StringToTimeFilter.php';
+
+/* Validators */
+require_once 'validators' . DIRECTORY_SEPARATOR . 'RequiredValidator.php';
+require_once 'validators' . DIRECTORY_SEPARATOR . 'InValidator.php';

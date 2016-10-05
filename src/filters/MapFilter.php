@@ -1,29 +1,34 @@
 <?php
 /**
- * NullOnEmptyFilter class file
+ * MapFilter class file
  * @package XLSWoles\filters
  * @author Ahmad Priatama <ahmad.priatama@gmail.com>
- * @since 2016.08.18
+ * @since 2016.09.25
  */
 
 namespace XLSWoles\filters;
 
 /**
- * Class NullOnEmptyFilter
+ * Class MapFilter
  * @package XLSWoles\filters
  * @author Ahmad Priatama <ahmad.priatama@gmail.com>
- * @since 2016.08.18
+ * @since 2016.09.25
  */
-class NullOnEmptyFilter
+class MapFilter
 {
-    const KEYWORD = 'null-on-empty';
+    const KEYWORD = 'map';
 
     /**
-     * @param string $input Text data.
+     * @var array
+     */
+    public $values = [];
+
+    /**
+     * @param string $input Text.
      * @return mixed
      */
     public function process($input)
     {
-        return $input == '' ? null : $input;
+        return isset($this->values[$input]) ? $this->values[$input] : $input;
     }
 }
