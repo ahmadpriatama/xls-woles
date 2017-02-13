@@ -6,7 +6,7 @@
  * Time: 3:26 PM
  */
 
-require_once dirname(dirname(dirname(__FILE__))) . '/phpexcel/Classes/PHPExcel.php';
+require_once dirname(dirname(__FILE__)) . '/vendor/phpoffice/phpspreadsheet/src/Bootstrap.php';
 
 require_once 'Reader.php';
 require_once 'Spreadsheet.php';

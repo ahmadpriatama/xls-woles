@@ -4,3 +4,6 @@ php:
 
 before_script:
   - composer install --prefer-dist --no-interaction --dev
+
+script:
+  - vendor/bin/phpunit
