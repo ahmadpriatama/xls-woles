@@ -20,16 +20,22 @@ class SingleColumn extends BaseColumn
      * @param \PHPExcel\Worksheet $worksheet Worksheet instance.
      * @param string              $column    Column name.
      * @param integer             $row       Row index.
+     * @param array               $rowData   Row data.
      * @return mixed
      */
-    public function getValue(\PHPExcel\Worksheet $worksheet, $column, $row)
+    public function getValue($worksheet, $column, $row, &$rowData)
     {
+        $this->rowData = &$rowData;
         $val = trim($worksheet->getCell("{$column}{$row}")->getFormattedValue());
         if (in_array($val, $this->asEmptyValue)) {
             $val = '';
         }
+        $value = $this->runThroughFilters($val);
+        $error = $this->runThroughValidators($value);
+        $rowData[$this->name] = $value;
         return [
-            'value' => $this->runThroughFilters($val),
+            'value' => $value,
+            'error' => $error,
         ];
     }
 }

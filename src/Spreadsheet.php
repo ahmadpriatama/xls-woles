@@ -52,7 +52,7 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
      * Spreadsheet constructor.
      * @param \PHPExcel\Spreadsheet $object Actual Spreadsheet instance.
      */
-    public function __construct(\PHPExcel\Spreadsheet $object)
+    public function __construct($object)
     {
         $this->_object = $object;
     }
@@ -79,12 +79,39 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
     }
 
     /**
+     * @return \PHPExcel\Worksheet
+     */
+    public function getInstance()
+    {
+        return $this->_sheetInstance;
+    }
+
+    /**
+     * @param string $index Sheet index.
+     * @return integer
+     */
+    public function getHighestRow()
+    {
+        return $this->_sheetInstance->getHighestRow();
+    }
+
+    /**
      * @param string $columnConfig Column config.
      * @return $this
      */
     public function setColumnConfig($columnConfig)
     {
         $this->columnConfig = $columnConfig;
+        return $this;
+    }
+
+    /**
+     * @param integer $index Sheet index.
+     * @return $this
+     */
+    public function setActiveSheetIndex($index)
+    {
+        $this->_sheetInstance = $this->_object->setActiveSheetIndex($index);
         return $this;
     }
 
@@ -106,16 +133,32 @@ class Spreadsheet /*extends \PHPExcel\Spreadsheet*/
         $this->initColumns();
         $range = static::calcRange($this->dataRange);
 
-        $data = [];
+        $data = [
+           'values' => [],
+           'errors' => [],
+        ];
         foreach (range($range['start']['row'], $range['end']['row']) as $index => $row) {
             $col = $range['start']['column'];
+            $errors = [];
+            $rowData = [];
             foreach ($this->_columns as $column) {
-                $return = $column->getValue($this->_sheetInstance, $col, $row);
+                $return = $column->getValue($this->_sheetInstance, $col, $row, $rowData);
                 if (isset($return['jump'])) {
                     $col = static::increment($col, $return['jump']);
                 }
-                $data[$index][$column->name] = $return['value'];
+                if (!empty($return['error'])) {
+                    $errors[$column->name] = $return['error'];
+                }
                 $col = static::increment($col, 1);
+            }
+
+            if (empty($errors)) {
+                $data['values'][$index] = $rowData;
+            } else {
+                $data['errors'][$index] = [
+                    'values' => $rowData,
+                    'errors' => $errors
+                ];
             }
         }
         return $data;

@@ -14,7 +14,7 @@ namespace XLSWoles;
  * @author Ahmad Priatama <ahmad.priatama@gmail.com>
  * @since 2016.08.15
  */
-class Reader extends \PHPExcel\IOFactory
+class Reader extends \PhpOffice\PhpSpreadsheet\IOFactory
 {
     /**
      * @param string $fileName File path.
